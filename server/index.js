@@ -1,28 +1,31 @@
-const express = require('express')
-const cors = require('cors')
+import express from 'express'
+import cors from 'cors'
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
 const app = express()
-const port = process.env.PORT || 3000 // Usa la variable de entorno PORT o 3000 por defecto
-const path = require('path')
-const fs = require('fs')
+const port = process.env.PORT || 3000
 
-app.use(cors()) // Habilita CORS para todas las rutas
-app.use(express.json()) // Habilita el análisis de JSON en las solicitudes
+app.use(cors())
+app.use(express.json())
 
-// Comprobar si existe la carpeta 'dist'
 const distPath = path.join(__dirname, '../dist')
 
 if (fs.existsSync(distPath)) {
   console.log('Serving static files from dist folder')
   app.use(express.static(distPath))
 
-  // Ruta comodín para Vue Router (solo si existe 'dist')
   app.get('*', (req, res) => {
     res.sendFile(path.join(distPath, 'index.html'))
   })
 } else {
   console.log('Dist folder not found. Serving a fallback message.')
   app.get('*', (req, res) => {
-    // Diferente mensaje según el entorno
     if (process.env.NODE_ENV === 'production') {
       res.send('<h1>Frontend not built. Contact the administrator.</h1>')
     } else {
